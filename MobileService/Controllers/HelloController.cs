@@ -23,6 +23,7 @@ namespace CustomAPIMobileService.Controllers
         {
             string[] TicBoard = new string[10];
             int i;
+            string move = "n/a";
             string winner;
             int nSpace = 0;
 
@@ -78,20 +79,55 @@ namespace CustomAPIMobileService.Controllers
                             });
                 }
 
+                //Pick a move
                 for (i=1;i<=9;i++)
                 {
                     if (TicBoard[i] == "?")
                     {
-                        return Request.CreateResponse(HttpStatusCode.OK,
-                                                        new
-                                                        {
-                                                            move = getStringFrom(i),
-                                                            winner = "inconclusive"
-                                                        });
+                        move = getStringFrom(i);
+                        TicBoard[i] = (nSpace % 2 == 1) ? "X" : "O";
+                        nSpace--;
+
+                        break;
                     }
                 }
 
-                throw new AccessViolationException();
+                if (move == "n/a")
+                {
+                    throw new AccessViolationException();
+                }
+
+                for (i = 0; i < 8; i++)
+                {
+                    winner = DetectWinner(TicBoard, i);
+
+                    if (winner != inconclusiveString)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.OK,
+                                new
+                                {
+                                    move = move,
+                                    winner = winner
+                                });
+                    }
+                }
+
+                if (nSpace == 0)
+                {
+                    return Request.CreateResponse(HttpStatusCode.OK,
+                            new
+                            {
+                                move = move,
+                                winner = "Tie"
+                            });
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK,
+                                new
+                                {
+                                    move = move,
+                                    winner = "inconclusive"
+                                });
             }
             catch (Exception ex)
             {
