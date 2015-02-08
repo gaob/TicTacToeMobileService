@@ -129,7 +129,7 @@ namespace CustomAPIMobileService.Controllers
                                     winner = "inconclusive"
                                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Request.CreateBadRequestResponse();
             }
