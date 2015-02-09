@@ -185,7 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\HelloController.cs" />
+    <Compile Include="Controllers\executemoveController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -214,6 +214,7 @@
     <Content Include="Performance\Microsoft.ServiceBus.MessagingPerformanceCounters.man" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\PublishProfiles\mobile-dotnet1.pubxml" />
     <None Include="Properties\PublishProfiles\mobile-DOTNETbackend.pubxml" />
   </ItemGroup>
   <PropertyGroup>

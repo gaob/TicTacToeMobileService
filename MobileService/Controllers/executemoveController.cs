@@ -8,7 +8,7 @@ using Microsoft.WindowsAzure.Mobile.Service;
 
 namespace CustomAPIMobileService.Controllers
 {
-    public class HelloController : ApiController
+    public class executemoveController : ApiController
     {
         public ApiServices Services { get; set; }
         private int[,] Direction = new int[,] { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 }, { 1, 4, 7 }, { 2, 5, 8 }, { 3, 6, 9 }, { 1, 5, 9 }, { 3, 5, 7 } };
