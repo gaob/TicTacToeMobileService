@@ -175,19 +175,5 @@ namespace CustomAPIMobileService.Controllers
 
             return inconclusiveString;
         }
-
-        /// <summary>
-        /// Gets the date time
-        /// </summary>
-        /// <returns>HttpResponseMessage.</returns>
-        public HttpResponseMessage Get()
-        {
-            return Request.CreateResponse(HttpStatusCode.OK,
-                new
-                {
-                    message = "Hello World! (GET) " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")
-                });
-        }
-
     }
 }
