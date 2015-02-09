@@ -13,6 +13,7 @@ namespace CustomAPIMobileService.Controllers
         public ApiServices Services { get; set; }
         private int[,] Direction = new int[,] { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 }, { 1, 4, 7 }, { 2, 5, 8 }, { 3, 6, 9 }, { 1, 5, 9 }, { 3, 5, 7 } };
         private const string inconclusiveString = "inconclusive";
+        private Random rnd = new Random();
 
         /// <summary>
         /// Takes in the input message, adds date and time and returns it.
@@ -24,8 +25,14 @@ namespace CustomAPIMobileService.Controllers
             string[] TicBoard = new string[10];
             int i;
             string move = "n/a";
-            string winner;
+            int sum = 0;
             int nSpace = 0;
+            int twoO = -1;
+            int twoX = -1;
+            int twoO_p = -1;
+            int twoX_p = -1;
+            string myPiece = "?";
+            int move_p = -1;
 
             try
             {
@@ -56,16 +63,24 @@ namespace CustomAPIMobileService.Controllers
 
                 for (i=0;i<8;i++)
                 {
-                    winner = DetectWinner(TicBoard, i);
+                    sum = DetectWinner(TicBoard, i);
 
-                    if (winner != inconclusiveString)
+                    if (sum == 3 || sum == -3)
                     {
                         return Request.CreateResponse(HttpStatusCode.OK,
                                 new
                                 {
                                     move = "n/a",
-                                    winner = winner
+                                    winner = (sum == 3 ? "O" : "X")
                                 });
+                    }
+                    else if (sum == 2)
+                    {
+                        twoO = i;
+                    }
+                    else if (sum == -2)
+                    {
+                        twoX = i;
                     }
                 }
 
@@ -79,18 +94,86 @@ namespace CustomAPIMobileService.Controllers
                             });
                 }
 
-                //Pick a move
-                for (i=1;i<=9;i++)
+                //If we have two pieces in a row, get the positions of the empty position.
+                if (twoO != -1)
                 {
-                    if (TicBoard[i] == "?")
+                    for (i = 0; i < 3; i++)
                     {
-                        move = getStringFrom(i);
-                        TicBoard[i] = (nSpace % 2 == 1) ? "X" : "O";
-                        nSpace--;
+                        if (TicBoard[Direction[twoO, i]] == "?")
+                        {
+                            twoO_p = Direction[twoO, i];
+                            break;
+                        }
+                    }
 
-                        break;
+                    if (twoO_p == -1)
+                    {
+                        throw new AccessViolationException();
                     }
                 }
+                if (twoX != -1)
+                {
+                    for (i = 0; i < 3; i++)
+                    {
+                        if (TicBoard[Direction[twoX, i]] == "?")
+                        {
+                            twoX_p = Direction[twoX, i];
+                            break;
+                        }
+                    }
+
+                    if (twoX_p == -1)
+                    {
+                        throw new AccessViolationException();
+                    }
+                }
+
+                //Determine my game piece.
+                myPiece = (nSpace % 2 == 1) ? "X" : "O";
+
+                //Win move
+                if ((myPiece == "X" && twoX_p != -1) ||
+                    (myPiece == "O" && twoO_p != -1))
+                {
+                    if (myPiece == "X")
+                    {
+                        move_p = twoX_p;
+                    }
+                    else
+                    {
+                        move_p = twoO_p;
+                    }
+                }
+                //Block move
+                else if ((myPiece == "X" && twoO_p != -1) ||
+                         (myPiece == "O" && twoX_p != -1))
+                {
+                    if (myPiece == "X")
+                    {
+                        move_p = twoO_p;
+                    }
+                    else
+                    {
+                        move_p = twoX_p;
+                    }
+                }
+                //Take center
+                else if (TicBoard[5] == "?")
+                {
+                    move_p = 5;
+                }
+                else
+                {
+                    do
+                    {
+                        move_p = rnd.Next(1, 10);
+                    }
+                    while (TicBoard[move_p] != "?");
+                }
+
+                move = getStringFrom(move_p);
+                TicBoard[move_p] = myPiece;
+                nSpace--;
 
                 if (move == "n/a")
                 {
@@ -99,15 +182,15 @@ namespace CustomAPIMobileService.Controllers
 
                 for (i = 0; i < 8; i++)
                 {
-                    winner = DetectWinner(TicBoard, i);
+                    sum = DetectWinner(TicBoard, i);
 
-                    if (winner != inconclusiveString)
+                    if (sum == 3 || sum == -3)
                     {
                         return Request.CreateResponse(HttpStatusCode.OK,
                                 new
                                 {
                                     move = move,
-                                    winner = winner
+                                    winner = (sum == 3 ? "O" : "X")
                                 });
                     }
                 }
@@ -162,18 +245,28 @@ namespace CustomAPIMobileService.Controllers
             }
         }
 
-        private string DetectWinner(string[] TicBoard, int d)
+        private int DetectWinner(string[] TicBoard, int d)
         {
-            if (TicBoard[Direction[d, 0]] == TicBoard[Direction[d, 1]] &&
-                TicBoard[Direction[d, 1]] == TicBoard[Direction[d, 2]])
+            int sum = 0;
+
+            for (int i = 0; i < 3; i++)
             {
-                if (TicBoard[Direction[d, 0]] == "O" || TicBoard[Direction[d, 0]] == "X")
+                switch (TicBoard[Direction[d, i]])
                 {
-                    return TicBoard[Direction[d, 0]];
+                    case "O":
+                        sum += 1;
+                        break;
+                    case "X":
+                        sum -= 1;
+                        break;
+                    case "?":
+                        break;
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
 
-            return inconclusiveString;
+            return sum;
         }
     }
 }
