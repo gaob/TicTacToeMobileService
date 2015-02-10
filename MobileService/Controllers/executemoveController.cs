@@ -196,6 +196,7 @@ namespace CustomAPIMobileService.Controllers
                 {
                     move_p = 5;
                 }
+                //Otherwise, take a random move.
                 else
                 {
                     do
